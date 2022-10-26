@@ -32,10 +32,18 @@ suggested future improvements:
     - histogram with a bell shape line
     
 
+Version: 1.2
+
+    histogram with bell shape line
+    save histogram at the same folder of the app
+    
+    suggested future improvements:
+    
+    - better positioning of the text on the histogram
 
 """
-version = "1.1"
-
+version = "1.2"
+app_name = "Homogeinity of variance"
 
 print(chr(27) + "[2J")
 print("Comparing Homogenity of Variance between 2 independent groups - Sample Size Analyser\n")
@@ -161,7 +169,7 @@ print(f"Defined P value = {P_level} (Type I Error)")
 print("-"*80)  
 print(f"\nThe False Negative rate (Type II error) of the trial is estimated by: {round(false_neg,1)} %")
 print(f"The stat power rate is estimated by: {round(100-false_neg,1)} %")
-print("The standard Type II error rate is 20% or 80% stat power\n")
+print("The standard Type II error rate is 20% or 80% of statistical power\n")
 
 
 # -------------------------------------------------------------------
@@ -172,13 +180,46 @@ n_hist = 2000000 # num of replicate for histogram
 hist_control = np.random.normal(average_input,sd_dev_input,n_hist) # generate control group
 hist_treatment = np.random.normal(average_input,expect_sd_dev,n_hist) # generate control group
 
-plt.hist([hist_control,hist_treatment],
-         bins=50,
-         label=["Control", "Probiotic"],
+_, bins, _ = plt.hist([hist_control, hist_treatment],
+                      bins=50,
+                      density=1,
+                      alpha=0.5,
+                      label=["Control", "Treated"],
+                      color=["red","blue"],
+                      )
+
+# draw normal line on the histogram
+mu_control, sigma_control = stats.norm.fit(hist_control)
+best_fit_line_control = stats.norm.pdf(bins, mu_control, sigma_control)
+plt.plot(bins,
+         best_fit_line_control,
+         color="red",
+         )
+
+mu_treatment, sigma_treatment = stats.norm.fit(hist_treatment)
+best_fit_line_treatment = stats.norm.pdf(bins, mu_treatment, sigma_treatment)
+plt.plot(bins,
+         best_fit_line_treatment,
+         color="blue"
          )
 plt.legend()
-plt.title("Theorical Distribution of Populations")
+plt.title("Distribution of Populations")
+plt.axvline(x=mu_control,
+            ymin=0,
+            ymax=1.6,
+            color="black",
+            
+            )
+plt.text(mu_control+sigma_control,
+         -.2,
+         app_name  + " - code version: " + version,
+         fontsize=6,
+         alpha = .4
+         )
+plt.savefig("histogram_populations.jpg",
+             dpi=200)
 plt.show()
+
 
 #------------------------------------------------------------------------
 """
